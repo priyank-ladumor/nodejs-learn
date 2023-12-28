@@ -1,4 +1,6 @@
 const fs = require('fs')
+const ejs = require('ejs')
+const path = require('path')
 
 // const productdata = JSON.parse(fs.readFileSync('product.json', 'utf-8'));
 // const dataproduct = productdata.products
@@ -6,9 +8,27 @@ const fs = require('fs')
 const model = require('../model/product')
 const crud = model.crud
 
-exports.getProducts = async (req, res) => {  // :id is called url parameter
+//view 
+exports.getProductsSSR = async (req, res) => {
     const getproducts = await crud.find();
-    res.status(200).json(getproducts)
+    ejs.renderFile(path.resolve(__dirname, '../pages/index.ejs'), { crud: getproducts }, function (err, str) {
+        // str => Rendered HTML string
+        res.send(str)
+    });
+}
+
+
+
+exports.getProducts = async (req, res) => {  // :id is called url parameter
+    if (req.query) {
+        // let sortvalue = req.query;
+        // console.log(sortvalue);
+        const getproducts = await crud.find().sort();
+        res.status(200).json(getproducts)
+    } else {
+        const getproducts = await crud.find().exec();
+        res.status(200).json(getproducts)
+    }
     // res.status(200).json(dataproduct)
 }
 exports.getSingleProduct = async (req, res) => {
@@ -25,6 +45,7 @@ exports.getSingleProduct = async (req, res) => {
 exports.createProduct = async (req, res) => {
     try {
         const createproduct = new crud(req.body)
+        await createproduct.save()
         res.status(201).json({ "msg": "Product added successfully." });
     } catch (err) {
         res.status(400).json({ "msg": err });

@@ -10,5 +10,6 @@ router
     .put('/:id', productController.updateProductPUT)
     .patch('/:id', productController.updateProductPATCH)
     .delete('/:id', productController.deleteProduct)
+    .get('/ssr/ssr', productController.getProductsSSR)
 
 exports.router = router;

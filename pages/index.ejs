@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<script>
+    function Delete(id) {
+        console.log(id)
+        fetch('/product/' + id, {
+            method: 'DELETE',
+        })
+    }
+</script>
+
+<body>
+    <% for (let product of crud) { %>
+        <% if (crud) { %>
+            <div style="border: 1px solid black; margin: 5px;">
+                <h2>
+                    <%= product.title %>
+                </h2>
+                <h2>
+                    <%= product.rating %>
+                        <%= product._id %>
+                </h2>
+                <h1 onclick="Delete('<%= product._id  %>')">delete</h1>
+            </div>
+        <% } %>
+    <% } %>
+</body>
+
+</html>

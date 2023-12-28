@@ -6,6 +6,8 @@ const fs = require('fs')
 const morgan = require('morgan')
 const mongoose = require('mongoose');
 const express = require('express')
+const cors = require('cors')
+var jwt = require('jsonwebtoken');
 const server = express();
 
 // db connections
@@ -18,15 +20,19 @@ async function main() {
 
 // const productController = require('./controller/product')
 const productRouter = require('./routes/products')
+const userRouter = require('./routes/user')
 
 const indexhtml = fs.readFileSync('index.html', 'utf-8');
 
+//Auth
+const Auth = require('./middleware/auth')
 
-
+server.use(cors());
 //body parser //application middle
 server.use(express.json())
 //morgan middleware (yhird party middleware)
 server.use(morgan('default'))
+
 
 
 //static hosting
@@ -34,11 +40,18 @@ server.use(express.static(process.env.PUBLIC_DIR))
 // server.use(express.static('public'))
 
 server.use('/product', productRouter.router)
+// server.use('/product', Auth, productRouter.router)
+
+server.use('/user', userRouter.router)
 
 
 server.listen(+process.env.PORT, () => {
   console.log("Server is running on http://localhost:8080");
 })
+
+
+
+
 
 
 

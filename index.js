@@ -5,13 +5,13 @@ require('dotenv').config()
 const fs = require('fs')
 const morgan = require('morgan')
 const mongoose = require('mongoose');
-
+const express = require('express')
+const server = express();
 
 // db connections
 main().catch(err => console.log(err));
 async function main() {
-  // await mongoose.connect('mongodb://priyank_ladumor:piyu1253@ac-voyds0w-shard-00-00.wgtmwy4.mongodb.net:27017,ac-voyds0w-shard-00-01.wgtmwy4.mongodb.net:27017,ac-voyds0w-shard-00-02.wgtmwy4.mongodb.net:27017/?replicaSet=atlas-nwbxgh-shard-0&ssl=true&authSource=admin ');
-  await mongoose.connect('mongodb+srv://priyank_ladumor:piyu1253@cluster0.wgtmwy4.mongodb.net/crud_product')
+  await mongoose.connect(process.env.DB_URL)
   console.log("db connected");
 }
 
@@ -21,14 +21,12 @@ const productRouter = require('./routes/products')
 
 const indexhtml = fs.readFileSync('index.html', 'utf-8');
 
-const express = require('express')
-const server = express();
+
 
 //body parser //application middle
 server.use(express.json())
 //morgan middleware (yhird party middleware)
 server.use(morgan('default'))
-
 
 
 //static hosting
@@ -38,7 +36,7 @@ server.use(express.static(process.env.PUBLIC_DIR))
 server.use('/product', productRouter.router)
 
 
-server.listen(8080, () => {
+server.listen(+process.env.PORT, () => {
   console.log("Server is running on http://localhost:8080");
 })
 

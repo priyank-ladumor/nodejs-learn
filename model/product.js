@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 // for configuration
 const productSchema = new Schema({
     // title: String,  // String is shorthand for {type: String}
-    title: { type: String, required: true , unique: true},
+    title: { type: String, index: { unique: true, dropDups: true }, required: true },
     description: { type: String },
     price: { type: Number, min: [0, "too low"], required: true },
     discountPercentage: { type: Number, min: [0, "wrong low discount"], max: [50, "wrong high discount"] },

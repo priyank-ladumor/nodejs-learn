@@ -1,7 +1,11 @@
 const fs = require('fs')
 
-const productdata = JSON.parse(fs.readFileSync('product.json', 'utf-8'));
-const dataproduct = productdata.products
+// const productdata = JSON.parse(fs.readFileSync('product.json', 'utf-8'));
+// const dataproduct = productdata.products
+
+const model = require('../model/product')
+const { error } = require('console')
+const crud = model.crud
 
 exports.getProducts = (req, res) => {  // :id is called url parameter
     res.status(200).json(dataproduct)
@@ -11,10 +15,20 @@ exports.getSingleProduct = (req, res) => {
     console.log(prod);
     res.status(200).json(prod)
 }
-exports.createProduct = (req, res) => {
-    dataproduct.push(req.body)
-    res.status(201).json(req.body)
+exports.createProduct = async (req, res) => {
+    try {
+        const crudproduct = new crud(req.body)
+
+        await crudproduct.save();
+        res.status(201).json({ "msg": "Product added successfully." });
+    } catch (err) {
+        res.status(400).json({ "msg": err });
+    }
+
+    // dataproduct.push(req.body)
+    // res.status(201).json(crudproduct)
 }
+
 exports.updateProductPUT = (req, res) => {
     const id = +req.params.id
     const prodIndex = dataproduct.findIndex(p => p.id === id);

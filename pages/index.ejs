@@ -6,7 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+<script src="/socket.io/socket.io.js"></script>
 <script>
+    const socket = io();
+    console.log("socket", socket.id)
+    setTimeout(()=> {
+        socket.emit('msg',{hello: 152})
+    },3000)
+    socket.on('server', (data) => {
+        console.log(data)
+    })
+
     function Delete(id) {
         console.log(id)
         fetch('/product/' + id, {
@@ -28,8 +38,8 @@
                 </h2>
                 <h1 onclick="Delete('<%= product._id  %>')">delete</h1>
             </div>
-        <% } %>
-    <% } %>
+            <% } %>
+                <% } %>
 </body>
 
 </html>

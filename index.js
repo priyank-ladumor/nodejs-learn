@@ -9,6 +9,8 @@ const express = require('express')
 const cors = require('cors')
 var jwt = require('jsonwebtoken');
 const server = express();
+const app = require('http').createServer(server)
+const io = require('socket.io')(app)
 
 // db connections
 main().catch(err => console.log(err));
@@ -45,9 +47,23 @@ server.use('/product', productRouter.router)
 server.use('/user', userRouter.router)
 
 
-server.listen(+process.env.PORT, () => {
+io.on('connection', (socket) => {
+  console.log('socket', socket.id);
+  socket.on('msg', (data) => {
+    console.log(data);
+  })
+  setTimeout(() => {
+    socket.emit('server', {data: "server to client"})
+  }, 3000);
+})
+
+
+app.listen(+process.env.PORT, () => {
   console.log("Server is running on http://localhost:8080");
 })
+// server.listen(+process.env.PORT, () => {
+//   console.log("Server is running on http://localhost:8080");
+// })
 
 
 

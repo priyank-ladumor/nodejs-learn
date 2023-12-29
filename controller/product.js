@@ -20,15 +20,22 @@ exports.getProductsSSR = async (req, res) => {
 
 
 exports.getProducts = async (req, res) => {  // :id is called url parameter
-    if (req.query) {
-        // let sortvalue = req.query;
-        // console.log(sortvalue);
-        const getproducts = await crud.find().sort();
+    let page = req.query.page;
+    let pageSize = 2;
+    if (req.query.sort) {
+        console.log(req.query.sort);
+        const getproducts = await crud.find().sort({ [req.query.sort]: req.query.order });
+        // const getproducts = await crud.find().sort({ [req.query.sort]: req.query.order }).limit(req.query.limit);
+        // const getproducts = await crud.find().sort({ price: -1 }).limit(2);
         res.status(200).json(getproducts)
-    } else {
+    } else if (req.query.page) {
+        const getproducts = await crud.find().skip(pageSize * (page - 1)).limit(pageSize).exec();
+        res.status(200).json(getproducts)
+    }else {
         const getproducts = await crud.find().exec();
         res.status(200).json(getproducts)
     }
+
     // res.status(200).json(dataproduct)
 }
 exports.getSingleProduct = async (req, res) => {

@@ -45,3 +45,23 @@ exports.userLogin = async (req, res) => {
         res.status(401).json({ "msg": err });
     }
 }
+
+exports.getUserDetails = async (req, res) => {
+    try {
+        var decoded = jwt.verify(req.headers.authorization, process.env.PRIVATE_KEY);
+        var finduser = await user.findOne({ email: decoded.email })
+        if (req.headers.authorization === finduser.token) {
+            console.log(finduser);
+            const item = {
+                firstname: finduser.firstname,
+                lastname: finduser.lastname,
+                email: finduser.email,
+            }
+            res.status(201).json(item);
+        } else {
+            res.status(401).json({ "msg": err });
+        }
+    } catch (err) {
+        res.status(401).json({ "msg": err });
+    }
+}

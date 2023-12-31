@@ -7,6 +7,8 @@ const path = require('path')
 
 const model = require('../model/product')
 const crud = model.crud
+const model2 = require('../model/user')
+const user = model2.user
 
 //view 
 exports.getProductsSSR = async (req, res) => {
@@ -31,7 +33,7 @@ exports.getProducts = async (req, res) => {  // :id is called url parameter
     } else if (req.query.page) {
         const getproducts = await crud.find().skip(pageSize * (page - 1)).limit(pageSize).exec();
         res.status(200).json(getproducts)
-    }else {
+    } else {
         const getproducts = await crud.find().exec();
         res.status(200).json(getproducts)
     }
@@ -51,9 +53,15 @@ exports.getSingleProduct = async (req, res) => {
 }
 exports.createProduct = async (req, res) => {
     try {
-        const createproduct = new crud(req.body)
-        await createproduct.save()
-        res.status(201).json({ "msg": "Product added successfully." });
+        var finduser = await user.findOne({ token: req.headers.authorization })
+        if (finduser) {
+            const createproduct = new crud(req.body)
+            createproduct.user_id = finduser._id
+            await createproduct.save()
+            res.status(201).json({ "msg": "Product added successfully." });
+        } else {
+            res.status(401).json({ "msg": err });
+        }
     } catch (err) {
         res.status(400).json({ "msg": err });
     }
@@ -99,6 +107,22 @@ exports.deleteProduct = async (req, res) => {
     // console.log(prodIndex);
     // dataproduct.splice(prodIndex, 1)
     // res.status(200).json(dataproduct)
+}
+
+exports.getuserProduct = async (req, res) => {
+    try {
+        var finduser = await user.findOne({ token: req.headers.authorization })
+        
+        if(finduser){
+            var finduserproduct = await crud.find({ user_id: finduser._id })
+            res.status(200).json(finduserproduct);
+        }else{
+            res.status(401).json({ "msg": err });
+        }
+
+    } catch (err) {
+        res.status(400).json({ "msg": err });
+    }
 }
 
 // export { deleteProduct, updateProductPATCH, updateProductPUT, createProduct, getSingleProduct, getProducts }

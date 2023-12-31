@@ -14,7 +14,8 @@ const productSchema = new Schema({
     brand: { type: String, required: true },
     category: String,
     thumbnail: { type: String, required: true },
-    images: [String]
+    images: [String],
+    user_id: String
 });
 
 exports.crud = mongoose.model("crud", productSchema);

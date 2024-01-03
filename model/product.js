@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 // for configuration
 const productSchema = new Schema({
     // title: String,  // String is shorthand for {type: String}
-    title: { type: String, index: true, unique: true, required: true },
+    title: { type: String, required: true },  //index: true, unique: true
     description: { type: String },
     price: { type: Number, min: [0, "too low"], required: true },
     discountPercentage: { type: Number, min: [0, "wrong low discount"], max: [50, "wrong high discount"] },
@@ -13,7 +13,7 @@ const productSchema = new Schema({
     stock: { type: Number, min: [0, "too low"], max: [500, "too high"] },
     brand: { type: String, required: true },
     category: String,
-    thumbnail: { type: String, required: true },
+    // thumbnail: { type: String, required: true },
     images: [String],
     user_id: String
 });

@@ -11,6 +11,9 @@ var jwt = require('jsonwebtoken');
 const server = express();
 const app = require('http').createServer(server)
 const io = require('socket.io')(app)
+const upload = require('./multer/cloudinary')
+
+
 
 // db connections
 main().catch(err => console.log(err));
@@ -29,9 +32,14 @@ const indexhtml = fs.readFileSync('index.html', 'utf-8');
 //Auth
 const Auth = require('./middleware/auth')
 
+// const bodyParse = require('body-parser')
+// server.use(bodyParser.json({limit: '35mb'}));
+
 server.use(cors());
 //body parser //application middle
-server.use(express.json())
+server.use(express.json({limit: '20mb'}))
+server.use(express.urlencoded({ extended: true }))
+
 //morgan middleware (yhird party middleware)
 server.use(morgan('default'))
 
@@ -45,7 +53,6 @@ server.use('/product', productRouter.router)
 // server.use('/product', Auth, productRouter.router)
 
 server.use('/user', userRouter.router)
-
 
 io.on('connection', (socket) => {
   console.log('socket', socket.id);

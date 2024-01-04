@@ -4,6 +4,7 @@ const user = model.user
 const path = require('path')
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+var nodemailer = require('nodemailer');
 
 // const private_key = fs.readFileSync(path.resolve(__dirname, '../private.key'), 'utf-8')
 
@@ -56,11 +57,88 @@ exports.getUserDetails = async (req, res) => {
                 firstname: finduser.firstname,
                 lastname: finduser.lastname,
                 email: finduser.email,
+                id: finduser._id
             }
             res.status(201).json(item);
         } else {
             res.status(401).json({ "msg": err });
         }
+    } catch (err) {
+        res.status(401).json({ "msg": err });
+    }
+}
+
+module.exports.userForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        var finduser = await user.findOne({ email: email })
+
+        if (finduser) {
+            var token = jwt.sign({ email: finduser.email }, process.env.PRIVATE_KEY, { expiresIn: "1d" });
+            // finduser.token = token;
+            // finduser.save()
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 465,
+                debug: true,
+                logger: true,
+                secure: true,
+                secureConnection: false,
+                auth: {
+                    user: process.env.MY_EMAIL,
+                    pass: process.env.MY_EMAIL_PASSWORD
+                },
+                tls: {
+                    rejectUnauthorized: true
+                }
+            });
+
+            var mailOptions = {
+                from: process.env.MY_EMAIL,
+                to: finduser.email,
+                subject: 'Forgot your password',
+                text: `http://localhost:3000/user/reset-password/${finduser._id}/${token}`
+            };
+
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent to ' + finduser.email);
+                    res.json('Email sent to ' + finduser.email)
+                }
+            });
+
+        } else {
+            res.send({ status: "user does not exit" })
+        }
+
+    } catch (err) {
+        res.status(400).json({ "msg": err });
+    }
+}
+
+module.exports.userResetPassword = async (req, res) => {
+    try {
+        const { id, token } = req.params;
+        const { password } = req.body;
+        // let isToken = JSON.parse(token)
+        var decoded = jwt.verify(token, process.env.PRIVATE_KEY);
+
+        if (decoded.email) {
+            const finduser = await user.findOne({ email: decoded.email, _id: id })
+            if (finduser) {
+                let newPassword = password.toString();
+                const pass = await bcrypt.hashSync(newPassword, 10)
+                finduser.password = pass;
+                await finduser.save()
+                res.send({ status: "reset password successfully" })
+            }
+        } else {
+            res.status(400)
+        }
+
     } catch (err) {
         res.status(401).json({ "msg": err });
     }

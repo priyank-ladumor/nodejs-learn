@@ -3,8 +3,8 @@ const multer = require('multer')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-      // cb(null, '/Desktop/SCT/multer/uploads')
-      cb(null, ".././front/src/images")
+      // cb(null, ".././front/src/images")
+      cb(null, "./public/images")
   },
   filename: function (req, file, cb) {
       cb(null, file.originalname)

@@ -5,8 +5,6 @@ const productdata = JSON.parse(fs.readFileSync('product.json', 'utf-8'));
 const dataproduct = productdata.products
 
 const express = require('express')
-
-
 const server = express();
 
 //body parser
@@ -14,6 +12,9 @@ server.use(express.json())
 
 //formdata body parser
 // server.use(express.urlencoded())
+
+//localhost static images api
+server.use("/images", express.static('./public/images'));
 
 //middleware used to stop req in any position where it is start or end
 server.use((req, res, next) => {

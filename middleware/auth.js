@@ -1,6 +1,8 @@
 var jwt = require('jsonwebtoken');
 const model = require('../model/user')
 const user = model.user
+const express = require('express')
+const server = express();
 
 const Auth = (async (req, res, next) => {
     try {
@@ -11,6 +13,7 @@ const Auth = (async (req, res, next) => {
         const finduser = await user.findOne({ email: decoded.email })
         console.log(decoded);
         if (decoded.email === finduser.email) {
+            req.finduser = finduser;
             next()
         } else {
             res.sendStatus(401)

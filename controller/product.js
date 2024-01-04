@@ -3,7 +3,6 @@ const ejs = require('ejs')
 const path = require('path')
 
 
-
 // const productdata = JSON.parse(fs.readFileSync('product.json', 'utf-8'));
 // const dataproduct = productdata.products
 
@@ -55,13 +54,17 @@ exports.getSingleProduct = async (req, res) => {
 }
 exports.createProduct = async (req, res) => {
     try {
-        var finduser = await user.findOne({ token: req.headers.authorization })
-
-        if (finduser) {
+        // var finduser = await user.findOne({ token: req.headers.authorization })
+        console.log(req.finduser,"req.finduser");
+        if (req.finduser) {
             const map = req.files.flatMap((ele) => ele.filename)
+            let imgApi = []
+            for (let i = 0; i < map.length; i++) {
+                imgApi.push(`http://localhost:8080/images/${map[i]}`)
+            }
             const createproduct = new crud(req.body)
-            createproduct.user_id = finduser._id
-            createproduct.images = map
+            createproduct.user_id = req.finduser._id
+            createproduct.images = imgApi
             await createproduct.save()
 
             res.status(201).json({ "msg": "Product added successfully." });
@@ -91,11 +94,15 @@ exports.updateProductPUT = async (req, res) => {
 exports.updateProductPATCH = async (req, res) => {
     try {
         const map = req.files.flatMap((ele) => ele.filename)
+        let imgApi = []
+        for (let i = 0; i < map.length; i++) {
+            imgApi.push(`http://localhost:8080/images/${map[i]}`)
+        }
 
         const updateproducts = await crud.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true });
         console.log(updateproducts, "updateproducts");
-        if(map?.length > 0){
-            updateproducts.images = map;
+        if (map?.length > 0) {
+            updateproducts.images = imgApi;
             await updateproducts.save()
         }
         res.status(200).json({ "msg": "Product updated successfully." });
@@ -125,10 +132,10 @@ exports.deleteProduct = async (req, res) => {
 
 exports.getuserProduct = async (req, res) => {
     try {
-        var finduser = await user.findOne({ token: req.headers.authorization })
+        // var finduser = await user.findOne({ token: req.headers.authorization })
 
-        if (finduser) {
-            var finduserproduct = await crud.find({ user_id: finduser._id })
+        if (req.finduser) {
+            var finduserproduct = await crud.find({ user_id: req.finduser._id })
             res.status(200).json(finduserproduct);
         } else {
             res.status(401).json({ "msg": err });

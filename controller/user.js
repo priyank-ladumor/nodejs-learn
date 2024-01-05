@@ -4,7 +4,8 @@ const user = model.user
 const path = require('path')
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-var nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer');
+const handlebars = require('handlebars')
 
 // const private_key = fs.readFileSync(path.resolve(__dirname, '../private.key'), 'utf-8')
 
@@ -52,12 +53,13 @@ exports.getUserDetails = async (req, res) => {
         var decoded = jwt.verify(req.headers.authorization, process.env.PRIVATE_KEY);
         var finduser = await user.findOne({ email: decoded.email })
         if (req.headers.authorization === finduser.token) {
-            console.log(finduser);
             const item = {
                 firstname: finduser.firstname,
                 lastname: finduser.lastname,
                 email: finduser.email,
-                id: finduser._id
+                id: finduser._id,
+                mobile: finduser.mobile,
+                user_pic: finduser.user_pic
             }
             res.status(201).json(item);
         } else {
@@ -68,15 +70,41 @@ exports.getUserDetails = async (req, res) => {
     }
 }
 
+module.exports.updateUserDetails = async (req, res) => {
+    try {
+        const finduser = req.finduser
+        if (finduser) {
+            const map = req.files.flatMap((ele) => ele.filename)
+            let imgApi = []
+            for (let i = 0; i < map.length; i++) {
+                imgApi.push(`http://localhost:8080/images/${map[i]}`)
+            }
+            const userData = {
+                firstname: req.body.firstname,
+                lastname: req.body.lastname,
+                email: req.body.email,
+                mobile: req.body.mobile,
+            }
+            const updateUser = await user.findOneAndUpdate({ _id: finduser._id }, userData, { new: true });
+            updateUser.user_pic = imgApi;
+            await updateUser.save()
+            res.status(200).json({ "msg": "User details updated successfully." });
+        } else {
+            res.status(401);
+        }
+    } catch (err) {
+        res.status(400).json({ "msg": err });
+    }
+}
+
 module.exports.userForgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         var finduser = await user.findOne({ email: email })
 
         if (finduser) {
-            var token = jwt.sign({ email: finduser.email }, process.env.PRIVATE_KEY, { expiresIn: "1d" });
-            // finduser.token = token;
-            // finduser.save()
+            var token = jwt.sign({ email: finduser.email }, process.env.PRIVATE_KEY, { expiresIn: "2m" });
+
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 host: 'smtp.gmail.com',
@@ -94,11 +122,20 @@ module.exports.userForgotPassword = async (req, res) => {
                 }
             });
 
+            const source = fs.readFileSync('.././nodejs/public/email.html', 'utf-8').toString();
+            const template = handlebars.compile(source)
+            const replacement = {
+                link: `http://localhost:3000/user/reset-password/${finduser._id}/${token}`,
+                name: finduser.firstname
+            }
+            const htmltosend = template(replacement)
+
             var mailOptions = {
                 from: process.env.MY_EMAIL,
                 to: finduser.email,
                 subject: 'Forgot your password',
-                text: `http://localhost:3000/user/reset-password/${finduser._id}/${token}`
+                html: htmltosend
+                // text: 
             };
 
             transporter.sendMail(mailOptions, function (error, info) {

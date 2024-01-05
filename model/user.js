@@ -4,6 +4,8 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
     firstname: { type: String, required: true },
     lastname: String,
+    user_pic: [String],
+    mobile: Number,
     email: {
         type: String,
         index: true,
@@ -17,6 +19,7 @@ const userSchema = new Schema({
         required: [true, 'Please provide an email']
     },
     password: { type: String, minLength: 6, required: true },
+    watchlater: [String],
     token: String
 });
 

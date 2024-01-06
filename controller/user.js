@@ -59,7 +59,8 @@ exports.getUserDetails = async (req, res) => {
                 email: finduser.email,
                 id: finduser._id,
                 mobile: finduser.mobile,
-                user_pic: finduser.user_pic
+                user_pic: finduser.user_pic,
+                watchlater: finduser.watchlater
             }
             res.status(201).json(item);
         } else {

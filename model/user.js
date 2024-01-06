@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+// const model = require('./product')
+// const crud = model.crud
 
 const userSchema = new Schema({
     firstname: { type: String, required: true },
@@ -19,8 +21,10 @@ const userSchema = new Schema({
         required: [true, 'Please provide an email']
     },
     password: { type: String, minLength: 6, required: true },
-    watchlater: [String],
+    watchlater: [{type: mongoose.Schema.Types.ObjectId, ref: 'cruds'}],
     token: String
 });
+
+// const crud = mongoose.model('crud', )
 
 exports.user = mongoose.model("user", userSchema);

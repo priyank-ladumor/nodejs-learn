@@ -9,6 +9,8 @@ const upload = file.upload
 
 router
     .get('/', productController.getProducts)
+    .post('/watchlater', Auth, productController.productWatchlatter)
+    .get('/watchlater', Auth, productController.getProductWatchlatter)
     .get('/user', Auth, productController.getuserProduct)
     .get('/:id', productController.getSingleProduct)
     .post('/', Auth, upload.array('images'), productController.createProduct)

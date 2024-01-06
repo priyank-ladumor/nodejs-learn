@@ -55,7 +55,7 @@ exports.getSingleProduct = async (req, res) => {
 exports.createProduct = async (req, res) => {
     try {
         // var finduser = await user.findOne({ token: req.headers.authorization })
-        console.log(req.finduser,"req.finduser");
+        console.log(req.finduser, "req.finduser");
         if (req.finduser) {
             const map = req.files.flatMap((ele) => ele.filename)
             let imgApi = []
@@ -141,6 +141,45 @@ exports.getuserProduct = async (req, res) => {
             res.status(401).json({ "msg": err });
         }
 
+    } catch (err) {
+        res.status(400).json({ "msg": err });
+    }
+}
+
+exports.productWatchlatter = async (req, res) => {
+    try {
+        const { _id, watchlater } = req.finduser
+        const id = _id.toString();
+        const pid = req.body.pid
+        if (id && pid) {
+            let product = await crud.findById({ _id: pid });
+            if (product) {
+
+                if (watchlater.includes(pid)) {
+                    let user = await model2.user.findByIdAndUpdate(_id, { $pull: { watchlater: pid } }, { new: true })
+                    res.send({ msg: "successfully removed from watchlater" })
+                } else {
+                    let user = await model2.user.findByIdAndUpdate(_id, { $push: { watchlater: pid } }, { new: true })
+                    res.send({ msg: "successfully added to watchlater" })
+                }
+            }
+        } else {
+            return res.status(401)
+        }
+    } catch (err) {
+        res.status(400).json({ "msg": err });
+    }
+}
+
+exports.getProductWatchlatter = async (req, res) => {
+    try {
+        const { _id, watchlater } = req.finduser
+        if (_id) {
+            const populate = await model2.user.findOne(_id).populate({ path: "watchlater", model: "crud" })
+            res.send(populate.watchlater)
+        } else {
+            return res.status(401)
+        }
     } catch (err) {
         res.status(400).json({ "msg": err });
     }

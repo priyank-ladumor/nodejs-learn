@@ -15,6 +15,7 @@ const productSchema = new Schema({
     category: String,
     // thumbnail: { type: String, required: true },
     images: [String],
+    // user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }
     user_id: String
 });
 
